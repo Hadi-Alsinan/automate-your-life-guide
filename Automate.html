@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automate your expensess - Firebase Tutorial</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0,0,0,0.1);
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="1" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tabs {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            padding: 0;
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #666;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .nav-tab.active {
+            color: #007bff;
+            background: white;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #007bff;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 8px;
+            margin: 1rem 0;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .code-header {
+            background: #333;
+            color: #fff;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            border-bottom: 1px solid #555;
+        }
+
+        .copy-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: auto;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #0056b3;
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+        }
+
+        pre {
+            margin: 0;
+            padding: 1rem;
+            overflow-x: auto;
+            background: #1e1e1e !important;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 4px solid #2196f3;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 8px rgba(33,150,243,0.15);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 4px solid #ff9800;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 8px rgba(255,152,0,0.15);
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            border-left: 4px solid #4caf50;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 8px rgba(76,175,80,0.15);
+        }
+
+        .file-tree {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .file-tree .folder {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .file-tree .file {
+            color: #666;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .nav-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        }
+
+        .nav-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e9ecef;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .api-test {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .api-test h4 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .test-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .test-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+        }
+
+        .response-area {
+            background: #1e1e1e;
+            color: #fff;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 1rem;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .nav-tab {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+    </style>
+    <script>
+        let currentStep = 0;
+        const totalSteps = 11;
+
+        function showStep(stepIndex) {
+            // Hide all steps
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(step => step.classList.remove('active'));
+            
+            // Hide all nav tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected step
+            steps[stepIndex].classList.add('active');
+            tabs[stepIndex].classList.add('active');
+            
+            currentStep = stepIndex;
+            updateProgress();
+            updateNavButtons();
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps - 1) {
+                showStep(currentStep + 1);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                showStep(currentStep - 1);
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentStep + 1) / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function updateNavButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (prevBtn) prevBtn.disabled = currentStep === 0;
+            if (nextBtn) nextBtn.disabled = currentStep === totalSteps - 1;
+        }
+
+        function copyCode(button) {
+            const codeBlock = button.parentElement.nextElementSibling;
+            const code = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                button.textContent = 'Failed';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        async function testAPI() {
+            const responseArea = document.getElementById('apiResponse');
+            const testBtn = document.getElementById('testApiBtn');
+            
+            testBtn.disabled = true;
+            testBtn.textContent = 'Testing...';
+            responseArea.textContent = 'Sending request...';
+            
+            const testData = {
+                "userId": "testUser123",
+                "transaction": "شراء إنترنت\nبـ 21.99 SAR\nمن Spotify AB P3781C3C72\nمدى 3180*\nحساب 0165*\nفي08-06-25",
+                "historicalTransactions": [
+                    "شراء إنترنت\nبـ 21.99 SAR\nمن Spotify AB P3781C3C72\nمدى 3180*\nحساب 0165*\nفي08-05-25",
+                    "شراء إنترنت\nبـ 21.99 SAR\nمن Spotify AB P3781C3C72\nمدى 3180*\nحساب 0165*\nفي07-04-25"
+                ]
+            };
+            
+            try {
+                // Note: This will fail in the demo, but shows the expected format
+                const response = await fetch('http://localhost:5001/YOUR_PROJECT/me-central1/api/transactions/parse', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                responseArea.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseArea.textContent = `Demo Mode - Expected Response:
+
+{
+  "success": true,
+  "data": {
+    "description": "شراء إنترنت",
+    "amount": 21.99,
+    "currency": "SAR",
+    "merchant": "Spotify",
+    "accountMasked": "3180* / 0165*",
+    "date": "2025-06-08",
+    "category": "Subscriptions",
+    "recurrence": {
+      "isRecurring": true,
+      "period": "monthly",
+      "confidence": 0.9
+    },
+    "rawText": "شراء إنترنت\\nبـ 21.99 SAR\\nمن Spotify AB P3781C3C72\\nمدى 3180*\\nحساب 0165*\\nفي08-06-25",
+    "bankFormat": "generic"
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "timestamp": "2025-08-03T12:00:00.000Z",
+    "processingTimeMs": 45
+  }
+}
+
+Note: Replace YOUR_PROJECT with your actual Firebase project ID`;
+            }
+            
+            testBtn.disabled = false;
+            testBtn.textContent = 'Test API';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            updateNavButtons();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏦 Automate your expensess</h1>
+            <p>Complete Firebase Cloud Functions Tutorial</p>
+        </header>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="showStep(0)">🚀 Setup</button>
+            <button class="nav-tab" onclick="showStep(1)">🔥 Firebase</button>
+            <button class="nav-tab" onclick="showStep(2)">⚡ Functions</button>
+            <button class="nav-tab" onclick="showStep(3)">🏗️ Structure</button>
+            <button class="nav-tab" onclick="showStep(4)">🛠️ Middleware</button>
+            <button class="nav-tab" onclick="showStep(5)">📝 Types</button>
+            <button class="nav-tab" onclick="showStep(6)">🏪 Constants</button>
+            <button class="nav-tab" onclick="showStep(7)">🔧 Utils</button>
+            <button class="nav-tab" onclick="showStep(8)">🛣️ Routes</button>
+            <button class="nav-tab" onclick="showStep(9)">📤 Export</button>
+            <button class="nav-tab" onclick="showStep(10)">🧪 Testing</button>
+        </nav>
+
+        <div class="content">
+            <!-- Step 0: Setup -->
+            <div class="step active">
+                <div class="step-header">
+                    <div class="step-number">🚀</div>
+                    <h2 class="step-title">Project Setup & Prerequisites</h2>
+                </div>
+                
+                <div class="info-box">
+                    <h4>🎯 What You'll Build</h4>
+                    <p>A robust Saudi bank transaction parser API using Firebase Cloud Functions that can:</p>
+                    <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                        <li>Parse transaction messages from all major Saudi banks</li>
+                        <li>Automatically categorize transactions</li>
+                        <li>Detect recurring payments</li>
+                        <li>Store transaction history in Firestore</li>
+                        <li>Handle batch processing</li>
+                    </ul>
+                </div>
+
+                <h3>Prerequisites</h3>
+                <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                    <li>Node.js 18+ installed</li>
+                    <li>Firebase CLI installed globally</li>
+                    <li>Google Cloud account with Firebase project</li>
+                    <li>Basic knowledge of TypeScript and Express.js</li>
+                </ul>
+
+                <h3>Install Firebase CLI</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        Terminal
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-bash">npm install -g firebase-tools
+firebase login</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>Important:</strong> Make sure you're logged in to Firebase and have the necessary permissions for your project.
+                </div>
+            </div>
+
+            <!-- Step 1: Firebase Setup -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <h2 class="step-title">Create Firebase Project & Enable Firestore</h2>
+                </div>
+
+                <h3>Step 1.1: Create Firebase Project</h3>
+                <p>Go to the <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a> and create or select your project.</p>
+
+                <h3>Step 1.2: Enable Firestore</h3>
+                <ol style="margin: 1rem 0; padding-left: 1.5rem;">
+                    <li>Navigate to <strong>Cloud Firestore</strong> in the Firebase Console</li>
+                    <li>Click <strong>Create database</strong></li>
+                    <li>Choose a location (recommend <code>me-central1</code> for Saudi Arabia)</li>
+                    <li>Start in <strong>Test mode</strong> for development</li>
+                </ol>
+
+                <div class="success-box">
+                    <strong>✅ Success:</strong> Your Firestore database is now ready to store transaction data!
+                </div>
+            </div>
+
+            <!-- Step 2: Cloud Functions Setup -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <h2 class="step-title">Set Up Cloud Functions with Express</h2>
+                </div>
+
+                <h3>Initialize Firebase Functions</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        Terminal
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-bash">firebase init functions</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <strong>Configuration:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li>✅ Use Existing project</li>
+                        <li>✅ TypeScript</li>
+                        <li>✅ Use ESLint</li>
+                        <li>✅ Install dependencies now</li>
+                    </ul>
+                </div>
+
+                <h3>Install Required Dependencies</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        Terminal (in functions folder)
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-bash">cd functions
+npm install express cors helmet express-rate-limit firebase-admin firebase-functions</code></pre>
+                </div>
+            </div>
+
+            <!-- Step 3: File Structure -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <h2 class="step-title">Project File Structure</h2>
+                </div>
+
+                <p>Create the following file structure in your <code>functions/</code> directory:</p>
+
+                <div class="file-tree">
+functions/<br>
+├── <span class="file">package.json</span><br>
+├── <span class="file">tsconfig.json</span><br>
+└── <span class="folder">src/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">index.ts</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="folder">routes/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">index.ts</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="folder">transactions/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">const.ts</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">types.ts</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">utils.ts</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="file">index.ts</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Structure Benefits:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li><strong>Modular:</strong> Each component has its own file</li>
+                        <li><strong>Scalable:</strong> Easy to add new features</li>
+                        <li><strong>Maintainable:</strong> Clear separation of concerns</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 4: Middleware -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <h2 class="step-title">Create the Middleware Function</h2>
+                </div>
+
+                <p>Create the main Express application in <code>src/index.ts</code>:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        src/index.ts
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-typescript">import express from "express";
+import cors from "cors";
+import routes from "./routes";
+import {onRequest} from "firebase-functions/v2/https";
+
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+
+app.use(
+  cors({
+    origin: true,
+  }),
+);
+
+// Your route handlers
+app.use(routes);
+
+// Handle invalid routes
+app.use((req, res) => {
+  res.status(404).json({
+    error: {
+      name: "Error",
+      status: 404,
+      message: "Invalid Request",
+      statusCode: 404,
+    },
+    message: "Invalid Request",
+  });
+});
+
+// Export the Express app as an onRequest function
+export const api = onRequest(
+  {
+    timeoutSeconds: 300,
+    region: "me-central1",
+    memory: "1GiB", // Note: Must be "1GiB", not "1GB" per v2 API
+    // Optional additional settings:
+    // minInstances: 1,
+    // concurrency: 80
+  },
+  app
+);</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Memory Setting:</strong> Use "1GiB" format, not "1GB" for Firebase Functions v2 API.
+                </div>
+            </div>
+
+            <!-- Step 5: Types -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <h2 class="step-title">Add TypeScript Types</h2>
+                </div>
+
+                <p>Create type definitions in <code>src/routes/transactions/types.ts</code>:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        src/routes/transactions/types.ts
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-typescript">export interface ParsedTransaction {
+  description: string;
+  amount: number;
+  currency: string;
+  merchant: string;
+  accountMasked: string;
+  date: string; // YYYY-MM-DD format
+  category: string;
+  recurrence: {
+    isRecurring: boolean;
+    period?: "daily" | "weekly" | "monthly" | "yearly";
+    confidence?: number; // 0-1 score for recurrence detection
+  };
+  rawText: string;
+  bankFormat?: string;
+}
+
+export interface CategoryRule {
+  keywords: string[];
+  category: string;
+  priority: number; // Higher priority rules are checked first
+}
+
+export interface MerchantPattern {
+  pattern: RegExp;
+  normalizedName: string;
+  category?: string;
+}
+
+export type ApiResponse<T = any> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+  metadata?: {
+    version: string;
+    timestamp: string;
+    processingTimeMs?: number;
+    region?: string;
+  };
+}</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <strong>🏗️ Type Benefits:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li><strong>Type Safety:</strong> Catch errors at compile time</li>
+                        <li><strong>IntelliSense:</strong> Better IDE support</li>
+                        <li><strong>Documentation:</strong> Self-documenting code</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 6: Constants -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">6</div>
+                    <h2 class="step-title">Add Constants & Bank Patterns</h2>
+                </div>
+
+                <p>Create bank parsing patterns and rules in <code>src/routes/transactions/const.ts</code>:</p>
+
+                <div class="info-box">
+                    <strong>🏦 Supported Banks:</strong> Al Rajhi, NCB/SNB, Riyad Bank, SAMBA, SAIB, BSF, ANB, SABB, AlJazira, AlBilad, FAB, Alinma, and digital wallets (STC Pay, Mobily Pay, Zain Pay, Tamara, Tabby).
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        src/routes/transactions/const.ts (COMPLETE FILE)
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-typescript">import {MerchantPattern, CategoryRule} from "./types";
+
+/**
+* Bank-specific parsing patterns
+* Add new bank formats here
+*/
+
+export const BANK_PATTERNS = {
+ // Generic pattern that works for most Saudi banks
+ generic: {
+   description: /^([^\n]+)/,
+   amount: /بـ\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /من\s+([^\n]+)/,
+   card: /مدى\s*(\d+\*)/,
+   account: /حساب\s*(\d+\*)/,
+   date: /في\s*(\d{2}-\d{2}-\d{1,2})/,
+ },
+
+ // Al Rajhi Bank (الراجحي) - Most popular bank in Saudi
+ alrajhi: {
+   description: /^([^\n]+)/,
+   amount: /(?:قيمة|مبلغ|بقيمة)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|لدى|عند)\s+([^\n]+)/,
+   card: /(?:بطاقة|كارت)\s*(\d+\*+)/,
+   account: /(?:حساب|رقم الحساب)\s*(\d+\*+)/,
+   date: /(?:بتاريخ|في|تاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   reference: /(?:مرجع|رقم مرجع)\s*([A-Z0-9]+)/,
+   terminal: /(?:طرفية|جهاز)\s*([A-Z0-9]+)/,
+ },
+
+ // National Commercial Bank (الأهلي) - NCB/AlAhli
+ ncb: {
+   description: /^([^\n]+)/,
+   amount: /(?:المبلغ|القيمة|بمبلغ)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:التاجر|من|لدى)\s+([^\n]+)/,
+   card: /(?:البطاقة|كارت)\s*(\d+\*+)/,
+   account: /(?:الحساب|حساب رقم)\s*(\d+\*+)/,
+   date: /(?:التاريخ|في)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   branch: /(?:الفرع|فرع)\s*(\d+)/,
+   reference: /(?:الرقم المرجعي|مرجع)\s*([A-Z0-9]+)/,
+ },
+
+ // Riyad Bank (بنك الرياض)
+ riyad: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|المبلغ|قدره)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|لصالح|إلى)\s+([^\n]+)/,
+   card: /(?:بطاقة رقم|البطاقة)\s*(\d+\*+)/,
+   account: /(?:من الحساب|الحساب)\s*(\d+\*+)/,
+   date: /(?:بتاريخ|في يوم)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   time: /(?:الساعة|وقت)\s*(\d{1,2}:\d{2})/,
+   location: /(?:في|بـ)\s+([^0-9\n]+)/,
+ },
+
+ // SAMBA Bank (سامبا) - Now part of SNB
+ samba: {
+   description: /^([^\n]+)/,
+   amount: /(?:بقيمة|مقدار|بمبلغ)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|عند|لدى)\s+([^\n]+)/,
+   card: /(?:بالبطاقة|البطاقة)\s*(\d+\*+)/,
+   account: /(?:الحساب|من حساب)\s*(\d+\*+)/,
+   date: /(?:في|بتاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   approval: /(?:رقم الموافقة|الموافقة)\s*([A-Z0-9]+)/,
+ },
+
+ // Saudi National Bank (البنك الأهلي السعودي) - SNB (merged SAMBA + NCB)
+ snb: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|القيمة|المبلغ)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|التاجر|عند)\s+([^\n]+)/,
+   card: /(?:البطاقة|بطاقة رقم)\s*(\d+\*+)/,
+   account: /(?:الحساب|حساب)\s*(\d+\*+)/,
+   date: /(?:في|التاريخ|بتاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   channel: /(?:القناة|عبر)\s+([^\n]+)/,
+   reference: /(?:المرجع|رقم مرجعي)\s*([A-Z0-9]+)/,
+ },
+
+ // Saudi Investment Bank (البنك السعودي للاستثمار) - SAIB
+ saib: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|قيمة|مقدار)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|لدى|عند)\s+([^\n]+)/,
+   card: /(?:بطاقة|كرت)\s*(\d+\*+)/,
+   account: /(?:حساب|الحساب رقم)\s*(\d+\*+)/,
+   date: /(?:بتاريخ|في)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   type: /(?:نوع العملية|العملية)\s+([^\n]+)/,
+ },
+
+ // Banque Saudi Fransi (البنك السعودي الفرنسي) - BSF
+ bsf: {
+   description: /^([^\n]+)/,
+   amount: /(?:مبلغ|بقيمة|القيمة)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|عند|التاجر)\s+([^\n]+)/,
+   card: /(?:البطاقة|بطاقة)\s*(\d+\*+)/,
+   account: /(?:الحساب|حساب رقم)\s*(\d+\*+)/,
+   date: /(?:في|التاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   location: /(?:المكان|في)\s+([^0-9\n]+)/,
+ },
+
+ // Arab National Bank (البنك العربي الوطني) - ANB
+ anb: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|المبلغ|قدره)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|لصالح|عند)\s+([^\n]+)/,
+   card: /(?:بطاقة رقم|البطاقة)\s*(\d+\*+)/,
+   account: /(?:من حساب|الحساب)\s*(\d+\*+)/,
+   date: /(?:بتاريخ|في)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   balance: /(?:الرصيد|الرصيد المتاح)\s*([\d,\.]+)/,
+ },
+
+ // Saudi British Bank (البنك السعودي البريطاني) - SABB
+ sabb: {
+   description: /^([^\n]+)/,
+   amount: /(?:Amount|مبلغ|القيمة)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|From|Merchant)\s+([^\n]+)/,
+   card: /(?:Card|البطاقة|بطاقة)\s*(\d+\*+)/,
+   account: /(?:Account|الحساب|حساب)\s*(\d+\*+)/,
+   date: /(?:Date|في|التاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   reference: /(?:Ref|مرجع|Reference)\s*([A-Z0-9]+)/,
+ },
+
+ // Bank AlJazira (بنك الجزيرة)
+ aljazira: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|قيمة|المبلغ)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|عند|لدى)\s+([^\n]+)/,
+   card: /(?:بطاقة|البطاقة)\s*(\d+\*+)/,
+   account: /(?:حساب|الحساب)\s*(\d+\*+)/,
+   date: /(?:في|بتاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   terminal: /(?:الجهاز|طرفية)\s*([A-Z0-9]+)/,
+ },
+
+ // Bank Albilad (بنك البلاد)
+ albilad: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|القيمة|مقدار)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|التاجر|عند)\s+([^\n]+)/,
+   card: /(?:بطاقة|البطاقة رقم)\s*(\d+\*+)/,
+   account: /(?:الحساب|حساب)\s*(\d+\*+)/,
+   date: /(?:بتاريخ|في|التاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   branch: /(?:الفرع|فرع رقم)\s*(\d+)/,
+ },
+
+ // First Abu Dhabi Bank (بنك أبوظبي الأول) - FAB
+ fab: {
+   description: /^([^\n]+)/,
+   amount: /(?:Amount|مبلغ|بقيمة)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|From|at)\s+([^\n]+)/,
+   card: /(?:Card|بطاقة)\s*(\d+\*+)/,
+   account: /(?:Account|حساب)\s*(\d+\*+)/,
+   date: /(?:Date|في|on)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   reference: /(?:Ref|مرجع)\s*([A-Z0-9]+)/,
+ },
+
+ // STC Pay (الدفع الرقمي - stc pay)
+ stcpay: {
+   description: /^([^\n]+)/,
+   amount: /(?:مبلغ|بقيمة|القيمة)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:إلى|من|للتاجر)\s+([^\n]+)/,
+   account: /(?:محفظة|الرقم)\s*(\d+\*+)/,
+   date: /(?:في|بتاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   time: /(?:الساعة|وقت)\s*(\d{1,2}:\d{2})/,
+   type: /(?:نوع العملية|العملية)\s+([^\n]+)/,
+   reference: /(?:رقم العملية|مرجع)\s*([A-Z0-9]+)/,
+ },
+
+ // Mobily Pay (موبايلي باي)
+ mobilypay: {
+   description: /^([^\n]+)/,
+   amount: /(?:مبلغ|بقيمة|القيمة)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:إلى|من|للتاجر)\s+([^\n]+)/,
+   account: /(?:محفظة|رقم المحفظة)\s*(\d+\*+)/,
+   date: /(?:في|التاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   reference: /(?:رقم المرجع|مرجع)\s*([A-Z0-9]+)/,
+ },
+
+ // Zain Pay (زين باي)
+ zainpay: {
+   description: /^([^\n]+)/,
+   amount: /(?:مبلغ|القيمة|بقيمة)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:إلى|من|التاجر)\s+([^\n]+)/,
+   account: /(?:محفظة|الرقم)\s*(\d+\*+)/,
+   date: /(?:في|بتاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   reference: /(?:رقم العملية|مرجع)\s*([A-Z0-9]+)/,
+ },
+
+ // Alinma Bank (بنك الإنماء)
+ alinma: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|المبلغ|قيمة)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|عند|لدى)\s+([^\n]+)/,
+   card: /(?:بطاقة|البطاقة)\s*(\d+\*+)/,
+   account: /(?:الحساب|حساب رقم)\s*(\d+\*+)/,
+   date: /(?:بتاريخ|في|التاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   islamic: /(?:وفقاً للشريعة|شريعة|إسلامي)/,
+ },
+
+ // Bank AlBilad (مصرف الراجحي الإسلامي)
+ rajhiislamic: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|القيمة|مقدار)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|لدى|عند)\s+([^\n]+)/,
+   card: /(?:بطاقة|البطاقة)\s*(\d+\*+)/,
+   account: /(?:الحساب|حساب)\s*(\d+\*+)/,
+   date: /(?:في|بتاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   islamic: /(?:حلال|شرعي|إسلامي)/,
+ },
+
+ // Generic Apple Pay format
+ applepay: {
+   description: /^([^\n]+)/,
+   amount: /(?:بـ|بمبلغ|Amount)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|From|at)\s+([^\n]+)/,
+   card: /(?:Apple Pay|آبل باي).*(\d+\*+)/,
+   date: /(?:في|on|Date)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   device: /(?:iPhone|iPad|Apple Watch|آيفون|آيباد)/,
+ },
+
+ // Generic Samsung Pay format
+ samsungpay: {
+   description: /^([^\n]+)/,
+   amount: /(?:بـ|بمبلغ|Amount)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|From|at)\s+([^\n]+)/,
+   card: /(?:Samsung Pay|سامسونج باي).*(\d+\*+)/,
+   date: /(?:في|on|Date)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   device: /(?:Galaxy|سامسونج)/,
+ },
+
+ // MADA (نظام مدى) - Generic MADA card format
+ mada: {
+   description: /^([^\n]+)/,
+   amount: /(?:بـ|بمبلغ|مبلغ)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|عند|لدى)\s+([^\n]+)/,
+   card: /(?:مدى|MADA)\s*(\d+\*+)/,
+   account: /(?:حساب|الحساب)\s*(\d+\*+)/,
+   date: /(?:في|بتاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   terminal: /(?:طرفية|جهاز)\s*([A-Z0-9]+)/,
+ },
+
+ // VISA format (international cards)
+ visa: {
+   description: /^([^\n]+)/,
+   amount: /(?:Amount|مبلغ|بـ)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|From|at)\s+([^\n]+)/,
+   card: /(?:VISA|فيزا).*(\d+\*+)/,
+   date: /(?:في|on|Date)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   reference: /(?:Ref|مرجع)\s*([A-Z0-9]+)/,
+ },
+
+ // Mastercard format (international cards)
+ mastercard: {
+   description: /^([^\n]+)/,
+   amount: /(?:Amount|مبلغ|بـ)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|From|at)\s+([^\n]+)/,
+   card: /(?:MasterCard|Mastercard|ماستركارد).*(\d+\*+)/,
+   date: /(?:في|on|Date)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   reference: /(?:Ref|مرجع)\s*([A-Z0-9]+)/,
+ },
+
+ // Tamara (Buy Now Pay Later)
+ tamara: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|القيمة|مبلغ)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|عند|لدى)\s+([^\n]+)/,
+   installment: /(?:قسط|دفعة)\s*(\d+)\s*من\s*(\d+)/,
+   date: /(?:في|بتاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   reference: /(?:رقم الطلب|رقم المرجع)\s*([A-Z0-9]+)/,
+ },
+
+ // Tabby (Buy Now Pay Later)
+ tabby: {
+   description: /^([^\n]+)/,
+   amount: /(?:بمبلغ|القيمة|مبلغ)\s*([\d,\.]+)\s*([A-Z]{3})/,
+   merchant: /(?:من|عند|التاجر)\s+([^\n]+)/,
+   installment: /(?:قسط|دفعة)\s*(\d+)/,
+   date: /(?:في|بتاريخ)\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/,
+   reference: /(?:رقم الطلب|Order)\s*([A-Z0-9]+)/,
+ },
+};
+
+/**
+* Known merchant patterns for normalization
+* Add new merchant patterns here
+*/
+export const MERCHANT_PATTERNS: MerchantPattern[] = [
+ {pattern: /spotify\s*ab/i, normalizedName: "Spotify", category: "Subscriptions"},
+ {pattern: /netflix/i, normalizedName: "Netflix", category: "Subscriptions"},
+ {pattern: /amazon.*prime/i, normalizedName: "Amazon Prime", category: "Subscriptions"},
+ {pattern: /starbucks/i, normalizedName: "Starbucks", category: "Food & Dining"},
+ {pattern: /carrefour|كارفور/i, normalizedName: "Carrefour", category: "Groceries"},
+ {pattern: /uber/i, normalizedName: "Uber", category: "Transportation"},
+ {pattern: /careem|كريم/i, normalizedName: "Careem", category: "Transportation"},
+];
+
+/**
+* Category classification rules - easily extensible
+* Add new keywords and categories here
+*/
+export const CATEGORY_RULES: CategoryRule[] = [
+ // Subscriptions & Digital Services
+ {
+   keywords: ["spotify", "netflix", "amazon prime", "youtube", "apple music", "shahid", "stc tv", "موسيقى", "اشتراك"],
+   category: "Subscriptions",
+   priority: 90,
+ },
+
+ // Food & Dining
+ {
+   keywords: ["مطعم", "كافيه", "مقهى", "بيتزا", "برجر", "كنتاكي", "ماكدونالدز", "pizza", "burger", "restaurant", "cafe", "kfc", "mcdonalds", "starbucks", "dunkin"],
+   category: "Food & Dining",
+   priority: 85,
+ },
+
+ // Groceries & Supermarkets
+ {
+   keywords: ["كارفور", "هايبر", "سوبر ماركت", "بقالة", "تموينات", "carrefour", "lulu", "panda", "danube", "extra"],
+   category: "Groceries",
+   priority: 85,
+ },
+
+ // Transport & Fuel
+ {
+   keywords: ["بنزين", "وقود", "تاكسي", "أوبر", "كريم", "مواقف", "رسوم طريق", "uber", "careem", "taxi", "fuel", "gas", "petrol", "aramco"],
+   category: "Transportation",
+   priority: 80,
+ },
+
+ // Shopping & Retail
+ {
+   keywords: ["تسوق", "متجر", "مول", "ملابس", "أزياء", "shopping", "mall", "store", "fashion", "zara", "h&m", "adidas", "nike"],
+   category: "Shopping",
+   priority: 75,
+ },
+
+ // Healthcare
+ {
+   keywords: ["صيدلية", "مستشفى", "عيادة", "طبيب", "دواء", "pharmacy", "hospital", "clinic", "medical", "nahdi", "aldawaa"],
+   category: "Healthcare",
+   priority: 80,
+ },
+
+ // Utilities & Bills
+ {
+   keywords: ["كهرباء", "مياه", "إنترنت", "جوال", "اتصالات", "موبايلي", "زين", "electricity", "water", "internet", "mobile", "stc", "mobily", "zain"],
+   category: "Utilities",
+   priority: 85,
+ },
+
+ // Entertainment
+ {
+   keywords: ["سينما", "ألعاب", "ملاهي", "ترفيه", "cinema", "games", "entertainment", "vox", "muvi"],
+   category: "Entertainment",
+   priority: 70,
+ },
+
+ // ATM & Banking
+ {
+   keywords: ["صراف", "سحب نقدي", "atm", "cash withdrawal", "رسوم مصرفية", "bank fee"],
+   category: "Banking & ATM",
+   priority: 95,
+ },
+];</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>💡 Bonus Challenge:</strong> Consider implementing a dynamic merchant pattern learning system to reduce categorization errors over time by tracking merchant patterns and keeping them in Firestore.
+                </div>
+            </div>
+
+            <!-- Step 7: Utils -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">7</div>
+                    <h2 class="step-title">Add Utility Functions</h2>
+                </div>
+
+                <p>Create parsing logic in <code>src/routes/transactions/utils.ts</code>:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        src/routes/transactions/utils.ts (key functions)
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-typescript">import {ParsedTransaction} from "./types";
+import {BANK_PATTERNS, CATEGORY_RULES, MERCHANT_PATTERNS} from "./const";
+
+// ==================== CORE PARSING FUNCTIONS ====================
+
+/**
+ * Main transaction parser function
+ */
+export function parseTransaction(rawText: string): ParsedTransaction {
+  const lines = rawText.trim().split("\n").map((line) => line.trim());
+
+  // Try different bank patterns
+  let parsedData: any = {};
+  let detectedBank = "generic";
+
+  for (const [bankName, patterns] of Object.entries(BANK_PATTERNS)) {
+    const result = tryParseWithPattern(rawText, patterns);
+    if (result.confidence > (parsedData.confidence || 0)) {
+      parsedData = result;
+      detectedBank = bankName;
+    }
+  }
+
+  // Extract basic fields
+  const description = parsedData.description || lines[0] || "";
+  const amount = parseFloat(parsedData.amount?.replace(/,/g, "") || "0");
+  const currency = parsedData.currency || "SAR";
+  const merchant = normalizeMerchant(parsedData.merchant || extractMerchantFallback(rawText));
+  const accountMasked = formatAccountMasked(parsedData.card, parsedData.account);
+  const date = normalizeDate(parsedData.date);
+
+  // Classify category
+  const category = classifyCategory(description, merchant);
+
+  // Basic recurrence detection
+  const recurrence = detectRecurrence(merchant, amount, description);
+
+  return {
+    description,
+    amount,
+    currency,
+    merchant,
+    accountMasked,
+    date,
+    category,
+    recurrence,
+    rawText,
+    bankFormat: detectedBank,
+  };
+}
+
+/**
+ * Try parsing with a specific bank pattern
+ */
+function tryParseWithPattern(text: string, patterns: any): any {
+  const result: any = {confidence: 0};
+  let matchCount = 0;
+
+  // Description
+  const descMatch = text.match(patterns.description);
+  if (descMatch) {
+    result.description = descMatch[1].trim();
+    matchCount++;
+  }
+
+  // Amount and currency
+  const amountMatch = text.match(patterns.amount);
+  if (amountMatch) {
+    result.amount = amountMatch[1];
+    result.currency = amountMatch[2];
+    matchCount += 2;
+  }
+
+  // Merchant
+  const merchantMatch = text.match(patterns.merchant);
+  if (merchantMatch) {
+    result.merchant = merchantMatch[1].trim();
+    matchCount++;
+  }
+
+  // Card
+  const cardMatch = text.match(patterns.card);
+  if (cardMatch) {
+    result.card = cardMatch[1];
+    matchCount++;
+  }
+
+  // Account
+  const accountMatch = text.match(patterns.account);
+  if (accountMatch) {
+    result.account = accountMatch[1];
+    matchCount++;
+  }
+
+  // Date
+  const dateMatch = text.match(patterns.date);
+  if (dateMatch) {
+    result.date = dateMatch[1];
+    matchCount++;
+  }
+
+  result.confidence = matchCount / Object.keys(patterns).length;
+  return result;
+}
+
+/**
+ * Normalize merchant name using patterns
+ */
+function normalizeMerchant(rawMerchant: string): string {
+  if (!rawMerchant) return "Unknown Merchant";
+
+  // Clean the merchant string
+  const normalized = rawMerchant
+    .replace(/[A-Z0-9]{8,}/g, "") // Remove long alphanumeric codes
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // Apply merchant patterns
+  for (const pattern of MERCHANT_PATTERNS) {
+    if (pattern.pattern.test(normalized)) {
+      return pattern.normalizedName;
+    }
+  }
+
+  return normalized || rawMerchant;
+}
+
+/**
+ * Extract merchant as fallback when pattern fails
+ */
+function extractMerchantFallback(text: string): string {
+  const merchantIndicators = ["من", "إلى", "لدى", "عند"];
+
+  for (const indicator of merchantIndicators) {
+    const regex = new RegExp(`${indicator}\\s+([^\\n]+)`, "i");
+    const match = text.match(regex);
+    if (match) {
+      return match[1].trim();
+    }
+  }
+
+  const words = text.split(/\s+/);
+  const possibleMerchants = words.filter((word) =>
+    /[A-Z]/.test(word) && word.length > 2
+  );
+
+  return possibleMerchants.join(" ") || "Unknown Merchant";
+}
+
+/**
+ * Format account/card information
+ */
+function formatAccountMasked(card?: string, account?: string): string {
+  const parts = [];
+  if (card) parts.push(card);
+  if (account) parts.push(account);
+  return parts.join(" / ") || "N/A";
+}
+
+/**
+ * Normalize date to YYYY-MM-DD format
+ */
+function normalizeDate(dateStr?: string): string {
+  if (!dateStr) return new Date().toISOString().split("T")[0];
+
+  let normalized = dateStr;
+
+  // Convert DD-MM-YY to YYYY-MM-DD
+  const ddmmyyMatch = dateStr.match(/(\d{2})-(\d{2})-(\d{1,2})/);
+  if (ddmmyyMatch) {
+    const [, day, month, year] = ddmmyyMatch;
+    const fullYear = year.length === 2 ? `20${year}` : year;
+    normalized = `${fullYear}-${month}-${day}`;
+  }
+
+  // Handle DD/MM/YYYY format
+  const ddmmyyyyMatch = dateStr.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (ddmmyyyyMatch) {
+    const [, day, month, year] = ddmmyyyyMatch;
+    normalized = `${year}-${month}-${day}`;
+  }
+
+  return normalized;
+}
+
+// ==================== CATEGORY CLASSIFICATION ====================
+
+/**
+ * Classify transaction category using rules-based approach
+ */
+function classifyCategory(description: string, merchant: string): string {
+  const text = `${description} ${merchant}`.toLowerCase();
+
+  const sortedRules = [...CATEGORY_RULES].sort((a, b) => b.priority - a.priority);
+
+  for (const rule of sortedRules) {
+    for (const keyword of rule.keywords) {
+      if (text.includes(keyword.toLowerCase())) {
+        return rule.category;
+      }
+    }
+  }
+
+  for (const pattern of MERCHANT_PATTERNS) {
+    if (pattern.category && pattern.pattern.test(text)) {
+      return pattern.category;
+    }
+  }
+
+  return "Other";
+}
+
+// ==================== RECURRENCE DETECTION ====================
+
+/**
+ * Basic recurrence detection
+ */
+function detectRecurrence(merchant: string, amount: number, description: string): {
+  isRecurring: boolean;
+  period?: "daily" | "weekly" | "monthly" | "yearly";
+  confidence?: number;
+} {
+  const subscriptionKeywords = ["spotify", "netflix", "prime", "subscription", "اشتراك"];
+  const isLikelySubscription = subscriptionKeywords.some((keyword) =>
+    merchant.toLowerCase().includes(keyword) ||
+    description.toLowerCase().includes(keyword)
+  );
+
+  if (isLikelySubscription) {
+    return {
+      isRecurring: true,
+      period: "monthly",
+      confidence: 0.8,
+    };
+  }
+
+  const utilityKeywords = ["كهرباء", "مياه", "إنترنت", "جوال", "electricity", "water", "internet", "mobile"];
+  const isUtility = utilityKeywords.some((keyword) =>
+    merchant.toLowerCase().includes(keyword) ||
+    description.toLowerCase().includes(keyword)
+  );
+
+  if (isUtility) {
+    return {
+      isRecurring: true,
+      period: "monthly",
+      confidence: 0.7,
+    };
+  }
+
+  return {
+    isRecurring: false,
+  };
+}
+
+/**
+ * Advanced recurrence detection with historical data
+ */
+export function detectRecurrenceWithHistory(
+  currentTransaction: ParsedTransaction,
+  historicalTransactions: ParsedTransaction[]
+): {
+  isRecurring: boolean;
+  period?: "daily" | "weekly" | "monthly" | "yearly";
+  confidence: number;
+} {
+  const similarTransactions = historicalTransactions.filter((tx) =>
+    tx.merchant === currentTransaction.merchant &&
+    Math.abs(tx.amount - currentTransaction.amount) <= currentTransaction.amount * 0.1
+  );
+
+  if (similarTransactions.length < 2) {
+    return {isRecurring: false, confidence: 0};
+  }
+
+  const dates = similarTransactions.map((tx) => new Date(tx.date)).sort();
+  const intervals = [];
+
+  for (let i = 1; i < dates.length; i++) {
+    const diff = dates[i].getTime() - dates[i-1].getTime();
+    const days = diff / (1000 * 60 * 60 * 24);
+    intervals.push(days);
+  }
+
+  const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+  const variance = intervals.reduce((sum, interval) => sum + Math.pow(interval - avgInterval, 2), 0) / intervals.length;
+  const standardDeviation = Math.sqrt(variance);
+
+  const isRegular = standardDeviation < avgInterval * 0.2;
+
+  if (!isRegular) {
+    return {isRecurring: false, confidence: 0};
+  }
+
+  let period: "daily" | "weekly" | "monthly" | "yearly";
+  let confidence = 0;
+
+  if (avgInterval >= 25 && avgInterval <= 35) {
+    period = "monthly";
+    confidence = 0.9;
+  } else if (avgInterval >= 6 && avgInterval <= 8) {
+    period = "weekly";
+    confidence = 0.8;
+  } else if (avgInterval >= 360 && avgInterval <= 370) {
+    period = "yearly";
+    confidence = 0.8;
+  } else if (avgInterval >= 0.8 && avgInterval <= 1.2) {
+    period = "daily";
+    confidence = 0.7;
+  } else {
+    return {isRecurring: false, confidence: 0};
+  }
+
+  return {
+    isRecurring: true,
+    period,
+    confidence,
+  };
+}
+
+/**
+ * Add new category rule
+ */
+export function addCategoryRule(keywords: string[], category: string, priority = 50): void {
+  CATEGORY_RULES.push({keywords, category, priority});
+}
+
+/**
+ * Add new merchant pattern
+ */
+export function addMerchantPattern(pattern: RegExp, normalizedName: string, category?: string): void {
+  MERCHANT_PATTERNS.push({pattern, normalizedName, category});
+}
+
+/**
+ * Add new bank parsing pattern
+ */
+export function addBankPattern(bankName: string, patterns: any): void {
+  (BANK_PATTERNS as any)[bankName] = patterns;
+}</code></pre>
+                </div>
+
+                <div class="success-box">
+                    <strong>🎯 Parser Features:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li>Multi-bank pattern matching</li>
+                        <li>Intelligent merchant normalization</li>
+                        <li>Automatic category classification</li>
+                        <li>Date normalization to ISO format</li>
+                        <li>Recurrence detection</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 8: Routes -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">8</div>
+                    <h2 class="step-title">Add Transaction Routes</h2>
+                </div>
+
+                <p>Create API endpoints in <code>src/routes/transactions/index.ts</code>:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        src/routes/transactions/index.ts (main endpoints)
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-typescript">import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
+import express from "express";
+import {ApiResponse, ParsedTransaction} from "./types";
+import {parseTransaction} from "./utils";
+import {CATEGORY_RULES, MERCHANT_PATTERNS} from "./const";
+
+const app = express.Router();
+// Initialize Firebase Admin (only once)
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+// ==================== API ROUTES ====================
+
+/**
+ * Health check endpoint
+ */
+app.get("/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Saudi Bank Transaction Parser API is running",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/**
+ * API documentation endpoint
+ */
+app.get("/docs", (req, res) => {
+  res.json({
+    name: "Saudi Bank Transaction Parser API",
+    version: "1.0.0",
+    endpoints: {
+      "GET /health": "Health check",
+      "GET /docs": "API documentation",
+      "POST /parse": "Parse single transaction",
+      "POST /parse/batch": "Parse multiple transactions",
+      "GET /categories": "Get available categories",
+      "POST /categories": "Add new category rule",
+      "GET /merchants": "Get merchant patterns",
+      "POST /merchants": "Add new merchant pattern",
+    },
+    example: {
+      endpoint: "POST /parse",
+      body: {
+        transaction: "شراء إنترنت\nبـ 21.99 SAR\nمن Spotify AB P3781C3C72\nمدى 3180*\nحساب 0165*\nفي08-06-2",
+        userId: "optional-user-id",
+        historicalTransactions: [],
+      },
+    },
+  });
+});
+
+/**
+ * Parse single transaction
+ */
+app.post("/parse", async (req, res) => {
+  const startTime = Date.now();
+  try {
+    const {transaction, historicalTransactions, userId} = req.body;
+
+    if (!transaction) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing transaction data",
+        message: "Please provide transaction text in the request body",
+      } as ApiResponse);
+    }
+
+    // Parse the transaction
+    const parsed = parseTransaction(transaction);
+
+    // Optional advanced recurrence detection
+    if (historicalTransactions && Array.isArray(historicalTransactions)) {
+      // e.g., parsed.recurrence = detectRecurrenceWithHistory(parsed, historicalTransactions);
+    }
+
+    // Optional Firestore storage
+    if (userId) {
+      try {
+        await admin.firestore()
+          .collection("users")
+          .doc(userId)
+          .collection("transactions")
+          .add({
+            ...parsed,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+      } catch (firestoreError) {
+        functions.logger.warn("Failed to store transaction in Firestore:", firestoreError);
+      }
+    }
+
+    const processingTime = Date.now() - startTime;
+
+    return res.json({
+      success: true,
+      data: parsed,
+      metadata: {
+        version: "1.0.0",
+        timestamp: new Date().toISOString(),
+        processingTimeMs: processingTime,
+      },
+    } as ApiResponse<ParsedTransaction>);
+  } catch (error) {
+    functions.logger.error("Transaction parsing error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      message: "Failed to parse transaction",
+    } as ApiResponse);
+  }
+});
+
+
+/**
+ * Parse multiple transactions (batch processing)
+ */
+app.post("/parse/batch", async (req, res) => {
+  const startTime = Date.now();
+
+  try {
+    const {transactions, userId} = req.body;
+
+    if (!transactions || !Array.isArray(transactions)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid input",
+        message: "Please provide an array of transactions",
+      } as ApiResponse);
+    }
+
+    if (transactions.length > 50) {
+      return res.status(400).json({
+        success: false,
+        error: "Batch too large",
+        message: "Maximum 50 transactions per batch",
+      } as ApiResponse);
+    }
+
+    const results = [];
+
+    for (const transaction of transactions) {
+      try {
+        const parsed = parseTransaction(transaction);
+        results.push({
+          success: true,
+          data: parsed,
+          original: transaction,
+        });
+      } catch (error) {
+        results.push({
+          success: false,
+          error: (error as Error).message,
+          original: transaction,
+        });
+      }
+    }
+
+    // Firestore batch write if needed
+    if (userId) {
+      const batch = admin.firestore().batch();
+      const userTransactionsRef = admin.firestore()
+        .collection("users")
+        .doc(userId)
+        .collection("transactions");
+
+      results
+        .filter((result) => result.success)
+        .forEach((result) => {
+          const docRef = userTransactionsRef.doc();
+          batch.set(docRef, {
+            ...result.data,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        });
+
+      try {
+        await batch.commit();
+      } catch (firestoreError) {
+        functions.logger.warn("Failed to store batch transactions:", firestoreError);
+      }
+    }
+
+    const processingTime = Date.now() - startTime;
+    const successCount = results.filter((r) => r.success).length;
+
+    return res.json({
+      success: true,
+      data: {
+        results,
+        summary: {
+          total: transactions.length,
+          successful: successCount,
+          failed: transactions.length - successCount,
+        },
+      },
+      metadata: {
+        version: "1.0.0",
+        timestamp: new Date().toISOString(),
+        processingTimeMs: processingTime,
+      },
+    } as ApiResponse);
+  } catch (error) {
+    functions.logger.error("Batch parsing error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      message: "Failed to process batch",
+    } as ApiResponse);
+  }
+});
+
+
+/**
+ * Get available categories
+ */
+app.get("/categories", (req, res) => {
+  const categories = [...new Set(CATEGORY_RULES.map((rule) => rule.category))];
+
+  res.json({
+    success: true,
+    data: {
+      categories: categories.sort(),
+      rules: CATEGORY_RULES.map((rule) => ({
+        category: rule.category,
+        priority: rule.priority,
+        keywordCount: rule.keywords.length,
+      })),
+    },
+  } as ApiResponse);
+});
+
+/**
+ * Add new category rule
+ */
+app.post("/categories", (req, res) => {
+  try {
+    const {keywords, category, priority = 50} = req.body;
+
+    if (!keywords || !Array.isArray(keywords) || !category) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid input",
+        message: "Please provide keywords array and category name",
+      } as ApiResponse);
+    }
+
+    CATEGORY_RULES.push({keywords, category, priority});
+
+    return res.json({
+      success: true,
+      message: `Category rule for '${category}' added successfully`,
+      data: {keywords, category, priority},
+    } as ApiResponse);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: "Failed to add category rule",
+    } as ApiResponse);
+  }
+});
+
+
+/**
+ * Get merchant patterns
+ */
+app.get("/merchants", (req, res) => {
+  const merchants = MERCHANT_PATTERNS.map((pattern) => ({
+    normalizedName: pattern.normalizedName,
+    category: pattern.category,
+    pattern: pattern.pattern.source,
+  }));
+
+  res.json({
+    success: true,
+    data: merchants,
+  } as ApiResponse);
+});
+
+/**
+ * Add new merchant pattern
+ */
+app.post("/merchants", (req, res) => {
+  try {
+    const {pattern, normalizedName, category} = req.body;
+
+    if (!pattern || !normalizedName) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid input",
+        message: "Please provide pattern and normalizedName",
+      } as ApiResponse);
+    }
+
+    const regex = new RegExp(pattern, "i");
+    MERCHANT_PATTERNS.push({pattern: regex, normalizedName, category});
+
+    return res.json({
+      success: true,
+      message: `Merchant pattern for '${normalizedName}' added successfully`,
+      data: {pattern, normalizedName, category},
+    } as ApiResponse);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: "Failed to add merchant pattern",
+    } as ApiResponse);
+  }
+});
+
+/**
+ * Get user's transaction history
+ */
+app.get("/users/:userId/transactions", async (req, res) => {
+  try {
+    const {userId} = req.params;
+    const {limit = 50, offset = 0, category} = req.query;
+
+    let query = admin.firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("transactions")
+      .orderBy("createdAt", "desc");
+
+    if (category) {
+      query = query.where("category", "==", category);
+    }
+
+    const snapshot = await query
+      .limit(Number(limit))
+      .offset(Number(offset))
+      .get();
+
+    const transactions = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        transactions,
+        pagination: {
+          limit: Number(limit),
+          offset: Number(offset),
+          count: transactions.length,
+        },
+      },
+    } as ApiResponse);
+  } catch (error) {
+    functions.logger.error("Failed to fetch transactions:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch transactions",
+    } as ApiResponse);
+  }
+});
+
+// 404 handler
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: "Not found",
+    message: "The requested endpoint does not exist",
+  } as ApiResponse);
+});
+
+// Error handling middleware
+app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  functions.logger.error("Express error:", error);
+  res.status(500).json({
+    success: false,
+    error: "Internal server error",
+    message: "Something went wrong",
+  } as ApiResponse);
+});
+
+
+// function detectRecurrenceWithHistory(parsed: ParsedTransaction, historicalTransactions: any[]) {
+//   // Placeholder for advanced recurrence detection logic
+//   throw new Error("Function not implemented.");
+// }
+
+export default app;</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <strong>🛣️ Available Endpoints:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li><code>POST /parse</code> - Parse single transaction</li>
+                        <li><code>POST /parse/batch</code> - Parse multiple transactions</li>
+                        <li><code>GET /categories</code> - Get available categories</li>
+                        <li><code>POST /categories</code> - Add new category rule</li>
+                        <li><code>GET /merchants</code> - Get merchant patterns</li>
+                        <li><code>GET /users/:userId/transactions</code> - Get user history</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Step 9: Export Routes -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">9</div>
+                    <h2 class="step-title">Export Your Routes</h2>
+                </div>
+
+                <p>Create the main routes index in <code>src/routes/index.ts</code>:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        src/routes/index.ts
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-typescript">import * as express from "express";
+import transactions from "./transactions";
+
+const router = express.Router();
+
+router.use("/transactions", transactions);
+
+export default router;</code></pre>
+                </div>
+
+                <div class="success-box">
+                    <strong>✅ Route Structure Complete!</strong> Your API now has a clean, modular structure that's easy to extend with new features.
+                </div>
+            </div>
+
+            <!-- Step 10: Testing -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">10</div>
+                    <h2 class="step-title">Run & Test Your API</h2>
+                </div>
+
+                <h3>Start Development Server</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        Terminal (in functions folder)
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-bash">npm run build
+npm run serve</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <strong>🌐 Your API will be available at:</strong><br>
+                    <code>http://localhost:5001/YOUR_PROJECT/me-central1/api/</code>
+                </div>
+
+                <h3>Test the API</h3>
+                <div class="api-test">
+                    <h4>Test Parse Endpoint</h4>
+                    <p>Click the button below to test the API with sample Saudi bank transaction data:</p>
+                    
+                    <div class="code-block">
+                        <div class="code-header">
+                            Sample Request Body
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-json">{
+  "userId": "testUser123",
+  "transaction": "شراء إنترنت\nبـ 21.99 SAR\nمن Spotify AB P3781C3C72\nمدى 3180*\nحساب 0165*\nفي08-06-25",
+  "historicalTransactions": [
+    "شراء إنترنت\nبـ 21.99 SAR\nمن Spotify AB P3781C3C72\nمدى 3180*\nحساب 0165*\nفي08-05-25"
+  ]
+}</code></pre>
+                    </div>
+                    
+                    <button class="test-btn" id="testApiBtn" onclick="testAPI()">Test API</button>
+                    
+                    <div class="response-area" id="apiResponse">Click "Test API" to see the expected response...</div>
+                </div>
+
+                <h3>Deploy to Production</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        Terminal
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-bash">firebase deploy --only functions</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Before Production:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li>Update Firestore security rules</li>
+                        <li>Set up proper authentication</li>
+                        <li>Configure rate limiting</li>
+                        <li>Add monitoring and logging</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" id="prevBtn" onclick="prevStep()">
+                    ← Previous
+                </button>
+                <button class="nav-btn" id="nextBtn" onclick="nextStep()">
+                    Next →
+                </button>
+            </div>
+        </div>
+    </div>
