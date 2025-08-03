@@ -494,7 +494,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 - **Issues**: [GitHub Issues](https://github.com/your-username/saudi-bank-parser/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/your-username/saudi-bank-parser/discussions)
-- **Email**: your-email@example.com
 
 ---
 
