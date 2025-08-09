@@ -357,7 +357,7 @@
     </style>
     <script>
         let currentStep = 0;
-        const totalSteps = 11;
+        const totalSteps = 12;
 
         function showStep(stepIndex) {
             // Hide all steps
@@ -506,18 +506,19 @@ Note: Replace YOUR_PROJECT with your actual Firebase project ID`;
             <div class="progress-fill" id="progressFill"></div>
         </div>
 
-        <nav class="nav-tabs">
+         <nav class="nav-tabs">
             <button class="nav-tab active" onclick="showStep(0)">🚀 Setup</button>
             <button class="nav-tab" onclick="showStep(1)">🔥 Firebase</button>
             <button class="nav-tab" onclick="showStep(2)">⚡ Functions</button>
-            <button class="nav-tab" onclick="showStep(3)">🏗️ Structure</button>
-            <button class="nav-tab" onclick="showStep(4)">🛠️ Middleware</button>
-            <button class="nav-tab" onclick="showStep(5)">📝 Types</button>
-            <button class="nav-tab" onclick="showStep(6)">🏪 Constants</button>
-            <button class="nav-tab" onclick="showStep(7)">🔧 Utils</button>
-            <button class="nav-tab" onclick="showStep(8)">🛣️ Routes</button>
-            <button class="nav-tab" onclick="showStep(9)">📤 Export</button>
-            <button class="nav-tab" onclick="showStep(10)">🧪 Testing</button>
+            <button class="nav-tab" onclick="showStep(3)">🔧 Config</button>
+            <button class="nav-tab" onclick="showStep(4)">🏗️ Structure</button>
+            <button class="nav-tab" onclick="showStep(5)">🛠️ Middleware</button>
+            <button class="nav-tab" onclick="showStep(6)">📝 Types</button>
+            <button class="nav-tab" onclick="showStep(7)">🏪 Constants</button>
+            <button class="nav-tab" onclick="showStep(8)">🔧 Utils</button>
+            <button class="nav-tab" onclick="showStep(9)">🛣️ Routes</button>
+            <button class="nav-tab" onclick="showStep(10)">📤 Export</button>
+            <button class="nav-tab" onclick="showStep(11)">🧪 Testing</button>
         </nav>
 
         <div class="content">
@@ -654,6 +655,56 @@ npm install express cors helmet express-rate-limit firebase-admin firebase-funct
                 </div>
             </div>
 
+             <!-- Step 3: Firebase Config -->
+            <div class="step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <h2 class="step-title">Set Up Firebase Configuration</h2>
+                </div>
+
+                <p>Create a centralized Firebase configuration file in <code>src/config/firebase.ts</code>:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        src/config/firebase.ts
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    <pre><code class="language-typescript">import * as admin from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
+
+/**
+ * Initialize Firebase Admin SDK with the most reliable method
+ * Uses Application Default Credentials which work seamlessly in all environments
+ */
+export function initializeFirebaseAdmin(): void {
+    if (!admin.apps.length) {
+        try {
+            admin.initializeApp();
+        } catch (error) {
+            throw error;
+        }
+    }
+}
+
+// Export admin and commonly used types for use in other files
+export { admin, Timestamp };</code></pre>
+                </div>
+
+                <div class="info-box">
+                    <strong>🔧 Configuration Benefits:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li><strong>Centralized:</strong> One place to manage Firebase initialization</li>
+                        <li><strong>Reliable:</strong> Uses Application Default Credentials</li>
+                        <li><strong>Reusable:</strong> Easy to import across your application</li>
+                        <li><strong>Type-safe:</strong> Exports common Firebase types</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important:</strong> This configuration uses Application Default Credentials, which work automatically in Firebase Cloud Functions without needing service account keys.
+                </div>
+            </div>
+
             <!-- Step 3: File Structure -->
             <div class="step">
                 <div class="step-header">
@@ -663,12 +714,14 @@ npm install express cors helmet express-rate-limit firebase-admin firebase-funct
 
                 <p>Create the following file structure in your <code>functions/</code> directory:</p>
 
-                <div class="file-tree">
+<div class="file-tree">
 functions/<br>
 ├── <span class="file">package.json</span><br>
 ├── <span class="file">tsconfig.json</span><br>
 └── <span class="folder">src/</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">index.ts</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="folder">config/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="file">firebase.ts</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;└── <span class="folder">routes/</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">index.ts</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="folder">transactions/</span><br>
@@ -676,7 +729,7 @@ functions/<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">types.ts</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">utils.ts</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="file">index.ts</span>
-                </div>
+</div>
 
                 <div class="info-box">
                     <strong>💡 Structure Benefits:</strong>
@@ -1590,17 +1643,13 @@ export function addBankPattern(bankName: string, patterns: any): void {
                         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
                     </div>
                     <pre><code class="language-typescript">import * as functions from "firebase-functions";
-import * as admin from "firebase-admin";
 import express from "express";
 import {ApiResponse, ParsedTransaction} from "./types";
 import {parseTransaction} from "./utils";
 import {CATEGORY_RULES, MERCHANT_PATTERNS} from "./const";
+import { admin } from "../../config/firebase";
 
 const app = express.Router();
-// Initialize Firebase Admin (only once)
-if (!admin.apps.length) {
-  admin.initializeApp();
-}
 
 // ==================== API ROUTES ====================
 
@@ -1972,12 +2021,9 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
 });
 
 
-// function detectRecurrenceWithHistory(parsed: ParsedTransaction, historicalTransactions: any[]) {
-//   // Placeholder for advanced recurrence detection logic
-//   throw new Error("Function not implemented.");
-// }
 
-export default app;</code></pre>
+export default app;
+</code></pre>
                 </div>
 
                 <div class="info-box">
